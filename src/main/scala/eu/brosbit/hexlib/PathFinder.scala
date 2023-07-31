@@ -1,8 +1,9 @@
 package eu.brosbit.hexlib
 
-import scala.collection.mutable.Queue
+import scala.collection.mutable
+import scala.collection.mutable.{ArrayBuffer, Queue}
 case class MapPositionWithDistance(pos:MapPosition, dist:Int)
-class PathFinder(hex:Hex) {
+class PathFinder(hex:Hex): 
 
   def findPath(from:MapPosition, to:MapPosition, map:Array[Array[Int]]):List[MapPosition] =
     val checked = Array.ofDim[Int](map.length, map(0).length)
@@ -10,65 +11,40 @@ class PathFinder(hex:Hex) {
         j <- 0 until checked(0).length do
       checked(i)(j) = Int.MaxValue
 
+    val stack = mutable.Stack[MapPosition]()
+    checked(from.r)(from.c) = 0
+    stack.push(from)
+    while stack.nonEmpty do
+      val point = stack.pop()
+      hex.neighbours(point).foreach( n =>
+        if map(n.r)(n.c) > -1 && checked(n.r)(n.c) >  checked(point.r)(point.c) + map(n.r)(n.c) then
+          checked(n.r)(n.c) = checked(point.r)(point.c) + map(n.r)(n.c)
+          stack.push(n)
+      )
+    //printMap(checked)
+    if checked(to.r)(to.c) == Int.MaxValue then List()
+    else takePath(from:MapPosition, to:MapPosition, checked:Array[Array[Int]])
+
+  private def takePath(from: MapPosition, to: MapPosition, map: Array[Array[Int]]):List[MapPosition] =
     var path:List[MapPosition] = Nil
-
-    Nil
-
-
-  //TODO: add returns path to go
-  def findPathOld(from:MapPosition, to: MapPosition, map: Array[Array[Int]] ):List[MapPosition] = {
-    val x = 10
-    val y = 10
-    
-    val distance:Array[Array[Int]] = Array.ofDim[Int](x,y).map(_.map(_ => Int.MaxValue))
-
-    val toCheck = Queue[MapPosition]()
-    toCheck += from
-    distance(from.r)(from.c) = 0
-    while(toCheck.nonEmpty) do
-      val mp = toCheck.front
-      toCheck.dequeue
-      val neighbours = hex.neighbours(mp).map(t => MapPosition(t._1, t._2))
-      neighbours.foreach(n => {
-        if map(n.r)(n.c) > 0 && distance(n.r)(n.c) > distance(mp.r)(mp.c) + map(n.r)(n.c) then
-          distance(n.r)(n.c) = distance(mp.r)(mp.c) + map(n.r)(n.c)
-          toCheck += n 
-      })
-      //println("check: " + mp)
-    
-    printPath(distance)
-    println("Odległość do szukanego pola: " + distance(to.r)(to.c))       
-    if distance(to.r)(to.c) == Int.MaxValue then Nil else countPath(to, distance)
-  }
-
-  private def countPath(from:MapPosition, distance:Array[Array[Int]]) = 
-    var path:List[MapPosition] = from::Nil
-    var check = from
-    var f = true
-    while(f) do
-      val neighbours = hex.neighbours(check)
-      val minPos = minHex(neighbours, distance)
-      path = minPos::path
-      check = minPos
-      if distance(check.r)(check.c) == 0 then f = false
+    path = to :: path
+    while true do
+      val ns = hex.neighbours(path.head)
+      val mpMin = ns.minBy(mp => map(mp.r)(mp.c))
+      if mpMin.r == from.r && mpMin.c == from.c then return path
+      else path = mpMin :: path
     path
-      
-  private def minHex(n:List[MapPosition], distance:Array[Array[Int]]) =
-    var m = distance(n.head.r)(n.head.c)
-    var d = n.head
-    n.foreach(mp => 
-      if m > distance(mp.r)(mp.c) then 
-        m = distance(mp.r)(mp.c) 
-        d = mp
-    )
-    d  
-    
 
-  def printPath(distance:Array[Array[Int]]) = 
-    distance.foreach(row => {
-      row.foreach(e => if e > 100 then print("  x ") else if e < 10 then print("  " + e + " ") else print(" " + e + " "))
+  private def printMap(map:Array[Array[Int]]):Unit =
+    map.foreach(ar =>
+      ar.foreach(p =>
+        val n = if p == Int.MaxValue then "-1 "
+          else if p > 9 then p + " " else p + "  "
+        print(n)
+      )
       println()
-    })
+    )
+  def countPath(path:List[MapPosition], map:Array[Array[Int]]):Int = path.foldLeft(0)((a, mp) => a + map(mp.r)(mp.c))
 
+end PathFinder
 
-}

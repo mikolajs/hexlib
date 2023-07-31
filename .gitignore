@@ -6,3 +6,5 @@ hs_err_pid*
 
 project/project
 target/
+.bsp/
+.idea/
