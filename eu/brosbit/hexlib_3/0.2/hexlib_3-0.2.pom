@@ -3,7 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>eu.brosbit</groupId>
-  <artifactId>eu.brosbit.hexlib</artifactId>
+  <artifactId>hexlib</artifactId>
   <version>0.2</version>
   <description>POM was created from install:install-file</description>
 </project>
