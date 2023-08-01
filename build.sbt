@@ -1,4 +1,4 @@
-name := "LsHcore"
+name := "hexlib"
 
 val scala3Version = "3.2.0"
 
@@ -13,7 +13,7 @@ lazy val root = project.
     name 	    := "hexlib",
     organization    := "eu.brosbit",
     scalaVersion    := scala3Version,
-    version := "0.1.1" ,
+    version := "0.2" ,
     libraryDependencies ++= Seq(
       "org.scalactic" % "scalactic_3" % "3.2.14",
       "org.scalatest" % "scalatest_3" % "3.2.14" % "test",
